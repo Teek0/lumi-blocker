@@ -1,4 +1,6 @@
 import psutil # Librería para gestionar procesos en Python
+import time
+from app.config import cargar_configuracion
 
 def obtener_procesos_activos():
     """
@@ -26,3 +28,35 @@ def cerrar_proceso(nombre_objetivo):
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             continue
     return cerrados
+
+def bucle_bloqueo_procesos(duracion_segundos=10, intervalo=1):
+    """
+    Ejecuta un bucle que durante 'duracion_seugndos' segundos busca y cierra procesos bloqueados.
+    También puede detenerse antes con Ctrl+C.
+    """
+    config = cargar_configuracion()
+    apps_bloqueadas = config.get("apps_bloqueadas", [])
+
+    print(f"Iniciando bloqueo durante {duracion_segundos} segundos. Ctrl+C para detener.")
+
+    tiempo_inicio = time.time()
+
+    try:
+        while True:
+            tiempo_actual = time.time()
+            if tiempo_actual - tiempo_inicio > duracion_segundos:
+                print("Duración alcanzada. Finalizando bloqueo.")
+                break
+            procesos_activos = obtener_procesos_activos()
+            for app in apps_bloqueadas:
+                if app in procesos_activos:
+                    cerrados = cerrar_proceso(app)
+                    if cerrados:
+                        print(f"Proceso cerrado: {app} (PID: {', '.join(map(str, cerrados))})")
+            time.sleep(intervalo)
+    except KeyboardInterrupt:
+        print("Bucle de bloqueo interrumpido por el usuario.")
+
+
+if __name__ == "__main__":
+    bucle_bloqueo_procesos(duracion_segundos=10)
