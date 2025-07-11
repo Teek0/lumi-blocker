@@ -29,34 +29,47 @@ def cerrar_proceso(nombre_objetivo):
             continue
     return cerrados
 
+def escanear_y_cerrar_apps(apps_bloqueadas):
+    """
+    Detecta qué apps están activas y las cierra si coinciden.
+    Retorna un diccionario con los resultados: {nombre_app: [pid, pid, ...]}
+    """
+    procesos_activos = obtener_procesos_activos()
+    cerrados_por_app = {}
+    for app in apps_bloqueadas:
+        if app in procesos_activos:
+            cerrados = cerrar_proceso(app)
+            if cerrados:
+                cerrados_por_app[app] = cerrados
+
+    return cerrados_por_app
+
+def ejecutar_con_duracion(funcion, args=(), duracion=10, intervalo=1):
+    """
+    Ejecuta una función repetidamente durante 'duracion' segundos, 
+    cada 'intervalo' segundos.
+    """
+    tiempo_inicio = time.time()
+    while time.time() - tiempo_inicio < duracion:
+        funcion(*args)
+        time.sleep(intervalo)
+
 def bucle_bloqueo_procesos(duracion_segundos=10, intervalo=1):
     """
-    Ejecuta un bucle que durante 'duracion_seugndos' segundos busca y cierra procesos bloqueados.
-    También puede detenerse antes con Ctrl+C.
+    Ejecuta un bucle de bloqueo durante cierto tiempo o hasta Ctrl+C.
     """
     config = cargar_configuracion()
-    apps_bloqueadas = config.get("apps_bloqueadas", [])
+    apps = config.get("apps_bloqueadas", [])
 
-    print(f"Iniciando bloqueo durante {duracion_segundos} segundos. Ctrl+C para detener.")
-
-    tiempo_inicio = time.time()
-
+    def tarea():
+        resultado = escanear_y_cerrar_apps(apps)
+        for app, pids in resultado.items():
+            print(f"{app} cerrado (PID: {', '.join(map(str, pids))})")
+    
     try:
-        while True:
-            tiempo_actual = time.time()
-            if tiempo_actual - tiempo_inicio > duracion_segundos:
-                print("Duración alcanzada. Finalizando bloqueo.")
-                break
-            procesos_activos = obtener_procesos_activos()
-            for app in apps_bloqueadas:
-                if app in procesos_activos:
-                    cerrados = cerrar_proceso(app)
-                    if cerrados:
-                        print(f"Proceso cerrado: {app} (PID: {', '.join(map(str, cerrados))})")
-            time.sleep(intervalo)
+        ejecutar_con_duracion(tarea, duracion=duracion_segundos, intervalo=intervalo)
     except KeyboardInterrupt:
-        print("Bucle de bloqueo interrumpido por el usuario.")
-
+        print("Bloqueo detenido manualmente.")
 
 if __name__ == "__main__":
     bucle_bloqueo_procesos(duracion_segundos=10)
