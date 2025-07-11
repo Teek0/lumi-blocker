@@ -1,0 +1,25 @@
+# __pycache__ en todos los niveles
+__pycache__/
+**/__pycache__/
+
+# Archivos compilados de Python
+*.pyc
+*.pyo
+*.pyd
+
+# Entorno virtual (opcional, si se llama venv)
+venv/
+
+# Configuración de editor (opcional)
+.vscode/
+.idea/
+
+# PyInstaller builds
+dist/
+build/
+*.spec
+
+# Archivos de caché de pytest
+.pytest_cache/
+**/.pytest_cache/
+
