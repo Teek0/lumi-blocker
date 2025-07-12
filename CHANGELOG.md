@@ -49,3 +49,9 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.1.4] - 2025-07-10
+### Test
+- Test de CLI para `block apps` usando `CliRunner` y `unittest.mock`
+
+---
+
