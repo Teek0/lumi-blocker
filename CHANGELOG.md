@@ -55,3 +55,15 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.1.5] - 2025-07-10
+### Added
+- Función `bloquear_webs()` para bloquear sitios modificando el archivo hosts
+- Función `restaurar_hosts_original()` para revertir cambios en hosts
+- Función `flush_dns()` para vaciar caché DNS según sistema operativo
+
+### Test
+- Tests de `bloquear_webs()` y `restaurar_hosts_original()` usando mocks
+- Test de `flush_dns()` simulando sistema operativo y subprocess
+
+---
+
