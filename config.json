@@ -1,5 +1,6 @@
 {
   "apps_bloqueadas": [
     "Notepad.exe"
-  ]
+  ],
+  "webs_bloqueadas": ["www.youtube.com", "twitter.com"]
 }
