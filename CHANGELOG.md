@@ -16,7 +16,7 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
-## [0.1.1] - 2025-07-10
+## [0.1.1] - 2025-07-11
 ### Added
 - Funciones `obtener_procesos_activos()` y `cerrar_proceso()` en `gestor_procesos.py`
 - Tests unitarios para ambas funciones usando `pytest` y `unittest.mock`
@@ -27,7 +27,7 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
-## [0.1.2] - 2025-07-10
+## [0.1.2] - 2025-07-11
 ### Added
 - Función `bucle_bloqueo_procesos(...)` para ejecutar cierre de procesos durante X segundos
 - Función `escanear_y_cerrar_apps(...)` modular y testeable
@@ -41,7 +41,7 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
-## [0.1.3] - 2025-07-10
+## [0.1.3] - 2025-07-11
 ### Added
 - CLI inicial con Typer en `main.py`
 - Comando `block apps` con opciones `--duracion` y `--intervalo`
@@ -49,13 +49,13 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
-## [0.1.4] - 2025-07-10
+## [0.1.4] - 2025-07-11
 ### Test
 - Test de CLI para `block apps` usando `CliRunner` y `unittest.mock`
 
 ---
 
-## [0.1.5] - 2025-07-10
+## [0.1.5] - 2025-07-12
 ### Added
 - Función `bloquear_webs()` para bloquear sitios modificando el archivo hosts
 - Función `restaurar_hosts_original()` para revertir cambios en hosts
@@ -67,7 +67,7 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
-## [0.1.6] - 2025-07-10
+## [0.1.6] - 2025-07-12
 ### Added
 - Comando CLI `block websites` para bloquear sitios desde config.json
 - Comando CLI `unblock websites` para restaurar el archivo hosts
