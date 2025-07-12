@@ -53,6 +53,7 @@ def ejecutar_con_duracion(funcion, args=(), duracion=10, intervalo=1):
     while time.time() - tiempo_inicio < duracion:
         funcion(*args)
         time.sleep(intervalo)
+    print("Tiempo de ejecución completado.")
 
 def bucle_bloqueo_procesos(duracion_segundos=10, intervalo=1):
     """
@@ -70,6 +71,3 @@ def bucle_bloqueo_procesos(duracion_segundos=10, intervalo=1):
         ejecutar_con_duracion(tarea, duracion=duracion_segundos, intervalo=intervalo)
     except KeyboardInterrupt:
         print("Bloqueo detenido manualmente.")
-
-if __name__ == "__main__":
-    bucle_bloqueo_procesos(duracion_segundos=10)
