@@ -38,3 +38,14 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Changed
 - Refactor del bucle principal para mejor testabilidad
+
+---
+
+## [0.1.3] - 2025-07-10
+### Added
+- CLI inicial con Typer en `main.py`
+- Comando `block apps` con opciones `--duracion` y `--intervalo`
+- Manejo de ejecución sin subcomandos con mensaje personalizado
+
+---
+
