@@ -67,3 +67,14 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.1.6] - 2025-07-10
+### Added
+- Comando CLI `block websites` para bloquear sitios desde config.json
+- Comando CLI `unblock websites` para restaurar el archivo hosts
+- Mensaje al usuario recomendando cerrar el navegador para que el bloqueo surta efecto
+
+### Test
+- Tests CLI para `block websites` y `unblock websites` usando `CliRunner` y mocks
+
+---
+
