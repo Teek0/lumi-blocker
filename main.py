@@ -1,7 +1,6 @@
 import typer
 from app.gestor_procesos import bucle_bloqueo_procesos
-from app.gestor_webs import bloquear_webs, flush_dns, restaurar_hosts_original
-from app.config import cargar_configuracion
+from utils.permisos import reiniciar_como_admin
 
 app = typer.Typer(help="LumiBlocker CLI - Controla tu enfoque bloqueando distracciones")
 
@@ -37,6 +36,11 @@ def bloquear_websites():
     """
     Bloquea sitios web definidos en config.json modificando el archivo hosts.
     """
+    reiniciar_como_admin()
+
+    from app.gestor_webs import bloquear_webs, flush_dns
+    from app.config import cargar_configuracion
+
     config = cargar_configuracion()
     dominios = config.get("webs_bloqueadas", [])
 
@@ -56,6 +60,10 @@ def desbloquear_websites():
     """
     Restaura el archivo hosts eliminando los sitios bloqueados por LumiBlocker.
     """
+    reiniciar_como_admin()
+
+    from app.gestor_webs import restaurar_hosts_original, flush_dns
+
     restaurar_hosts_original()
     flush_dns()
     typer.echo("Sitios desbloqueados correctamente.")
