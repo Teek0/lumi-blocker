@@ -78,3 +78,14 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.1.7] - 2025-07-15
+### Added
+- Función `es_administrador()` para detectar privilegios elevados (Windows)
+- Función `reiniciar_como_admin()` que relanza el script con permisos de admin
+- Integración en CLI: comandos `block websites` y `unblock websites` ahora piden elevación si es necesario
+
+### Test
+- Tests unitarios para `es_administrador()` simulando True, False y excepción
+- Tests para `reiniciar_como_admin()` mockeando ejecución y validando comportamiento sin ejecutar UAC real
+
+---
