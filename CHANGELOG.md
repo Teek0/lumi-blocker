@@ -101,3 +101,17 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 - `config.py` permite cargar configuraciones desde rutas externas
 
 ---
+
+## [0.1.9] - 2025-07-17
+
+### Added
+- Nuevo módulo `planificador.py` para manejar distintos modos de bloqueo
+- Función `modo_temporizador(...)` que ejecuta una función durante un periodo de tiempo determinado, útil para bloqueos temporales
+- Soporte de argumentos dinámicos vía `*args` y `**kwargs` para máxima reutilización
+
+### Test
+- Test unitario para `modo_temporizador(...)` usando mocks de `time.time` y `time.sleep`
+- Validación del número de llamadas a la función pasada
+
+### Docs
+- Agregados docstrings explicativos a funciones en `main.py`
