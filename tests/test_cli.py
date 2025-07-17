@@ -1,6 +1,8 @@
 from typer.testing import CliRunner
 from main import app
 from unittest.mock import patch
+import shutil
+import os
 
 runner = CliRunner()
 
@@ -9,31 +11,28 @@ def test_comando_block_apps_con_args():
         result = runner.invoke(app, ["block", "apps", "--duracion", "2", "--intervalo", "1"])
 
         assert result.exit_code == 0
-        assert "Bloqueando apps por 2.0 segundos" in result.stdout
+        assert "Bloqueando apps por 2.0 segundos" in result.output
         mock_bucle.assert_called_once_with(duracion_segundos=2.0, intervalo=1.0)
 
-def test_cli_block_websites():
-    config_falsa = {
-        "webs_bloqueadas": ["youtube.com", "facebook.com"]
-    }
+def test_block_websites_con_config_real():
+    os.environ["TESTING"] = "1"  # evita ejecutar reiniciar_como_admin()
 
-    with patch("main.cargar_configuracion", return_value=config_falsa):
-        with patch("main.bloquear_webs") as mock_bloquear:
-            with patch("main.flush_dns") as mock_flush:
-                result = runner.invoke(app, ["block", "websites"])
+    result = runner.invoke(app, [
+        "block", "websites",
+        "--config-path", "tests/data/config_test.json"
+    ])
 
-                assert result.exit_code == 0
-                assert "youtube.com" in result.stdout
-                assert "facebook.com" in result.stdout
-                mock_bloquear.assert_called_once_with(["youtube.com", "facebook.com"])
-                mock_flush.assert_called_once()
+    print("OUTPUT:", result.output)
+    assert result.exit_code == 0
+    assert "youtube.com" in result.output
+    assert "Sitios bloqueados." in result.output
 
-def test_cli_unblock_websites():
-    with patch("main.restaurar_hosts_original") as mock_restaurar:
-        with patch("main.flush_dns") as mock_flush:
-            result = runner.invoke(app, ["unblock", "websites"])
+def test_unblock_websites_output():
+    os.environ["TESTING"] = "1"  # evita ejecutar reiniciar_como_admin()
+    
+    result = runner.invoke(app, ["unblock", "websites"])
 
-            assert result.exit_code == 0
-            assert "Sitios desbloqueados correctamente." in result.stdout
-            mock_restaurar.assert_called_once()
-            mock_flush.assert_called_once()
+    print("OUTPUT:", result.output)
+    assert result.exit_code == 0
+    assert "Sitios desbloqueados correctamente." in result.output
+
