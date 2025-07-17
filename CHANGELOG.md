@@ -89,3 +89,15 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 - Tests para `reiniciar_como_admin()` mockeando ejecución y validando comportamiento sin ejecutar UAC real
 
 ---
+
+## [0.1.8] - 2025-07-17
+### Added
+- Se corrige errores en los tests rotos por la implementación de `reiniciar_como_admin()`
+- Soporte para el parámetro `--config-path` en `block websites`
+- Lógica condicional para omitir `reiniciar_como_admin()` en modo testing
+- Tests funcionales de CLI usando archivos reales sin mocks (`config_test.json`)
+
+### Changed
+- `config.py` permite cargar configuraciones desde rutas externas
+
+---
