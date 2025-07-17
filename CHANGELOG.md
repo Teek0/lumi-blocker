@@ -115,3 +115,16 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Docs
 - Agregados docstrings explicativos a funciones en `main.py`
+
+---
+
+## [0.1.10] - 2025-07-17
+
+### Added
+- Función `parsear_duracion(...)` para interpretar duraciones flexibles como '25m', '2h', '90s' o números
+- Compatibilidad con entrada como `int` o `float` (minutos por defecto)
+
+### Test
+- Test unitarios para casos válidos y formato inválido
+
+---
