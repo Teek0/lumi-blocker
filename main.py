@@ -14,6 +14,10 @@ app.add_typer(unblock_app, name="unblock")
 
 @app.callback(invoke_without_command=True)
 def main(ctx: typer.Context):
+    """
+    Bienvenido a LumiBlocker
+    Usa subcomandos como 'block apps' para comenzar.
+    """
     if ctx.invoked_subcommand is None:
         typer.echo("Bienvenido a LumiBlocker\\nUsa 'block apps' para bloquear aplicaciones.")
 
@@ -22,11 +26,17 @@ def bloquear_apps(
     duracion: float = typer.Option(10, help="Duración del bloqueo en segundos"),
     intervalo: float = typer.Option(1, help="Intervalo entre escaneos en segundos")
 ):
+    """
+    Bloquea las aplicaciones definidas en config.json durante cierto tiempo.
+    """
     typer.echo(f"Bloqueando apps por {duracion} segundos (intervalo: {intervalo}s)...")
     bucle_bloqueo_procesos(duracion_segundos=duracion, intervalo=intervalo)
 
 @block_app.command("websites")
 def bloquear_websites(config_path: str = "config.json"):
+    """
+    Bloquea sitios web definidos en config.json modificando el archivo hosts.
+    """
     import os
     if not os.environ.get("TESTING"):
         reiniciar_como_admin()
@@ -44,6 +54,9 @@ def bloquear_websites(config_path: str = "config.json"):
 
 @unblock_app.command("websites")
 def desbloquear_websites():
+    """
+    Restaura el archivo hosts eliminando los sitios bloqueados por LumiBlocker.
+    """
     import os
     if not os.environ.get("TESTING"):
         reiniciar_como_admin()
