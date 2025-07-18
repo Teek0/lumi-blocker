@@ -128,3 +128,15 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 - Test unitarios para casos válidos y formato inválido
 
 ---
+
+## [0.1.11] - 2025-07-17
+
+### Added
+- Función `modo_horario(...)` en `planificador.py` que ejecuta acciones si la hora actual está en el rango definido
+- Soporte para rangos que cruzan medianoche (ej: 22:00 a 03:00)
+
+### Test
+- Test unitarios de `modo_horario` usando mocks de `datetime.now` para simular hora en rango y fuera de rango
+- Función auxiliar `_modo_horario_iter(...)` para facilitar pruebas controladas
+
+---
