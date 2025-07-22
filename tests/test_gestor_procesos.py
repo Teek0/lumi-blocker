@@ -77,3 +77,27 @@ def test_bucle_bloqueo_procesos_conecta_todo_correctamente():
             with patch('app.gestor_procesos.escanear_y_cerrar_apps', return_value={'notepad.exe': [1234]}) as mock_escaneo:
                 tarea_llamada()  # Ejecutamos la tarea como en el bucle
                 mock_escaneo.assert_called_once_with(["notepad.exe"])
+
+def test_cerrar_proceso_ignora_proceso_protegido():
+    mock_proc = MagicMock()
+    mock_proc.info = {'name': 'explorer.exe', 'pid': 1111}
+    mock_proc.name.return_value = 'explorer.exe'  # nombre real del proceso para verificación
+    mock_proc.pid = 1111
+
+    with patch('psutil.process_iter', return_value=[mock_proc]):
+        cerrados = cerrar_proceso('explorer.exe')
+        assert cerrados == []  # explorer.exe está en PROCESOS_PROTEGIDOS
+        mock_proc.terminate.assert_not_called()
+
+
+def test_cerrar_proceso_ignora_pid_actual():
+    import os
+    mock_proc = MagicMock()
+    mock_proc.info = {'name': 'notepad.exe', 'pid': os.getpid()}
+    mock_proc.name.return_value = 'notepad.exe'
+    mock_proc.pid = os.getpid()
+
+    with patch('psutil.process_iter', return_value=[mock_proc]):
+        cerrados = cerrar_proceso('notepad.exe')
+        assert cerrados == []  # no debería cerrarse a sí mismo
+        mock_proc.terminate.assert_not_called()
