@@ -25,3 +25,6 @@ build/
 
 # Plantillas para docs
 plantillas.txt
+
+# Archivo de logs autogenerado
+logs.json
