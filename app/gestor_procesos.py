@@ -1,6 +1,48 @@
 import psutil # Librería para gestionar procesos en Python
 import time
 from app.config import cargar_configuracion
+import os
+
+PROCESOS_PROTEGIDOS = {
+    "system",
+    "system idle process",
+    "wininit.exe",
+    "winlogon.exe",
+    "csrss.exe",
+    "smss.exe",
+    "svchost.exe",
+    "explorer.exe",
+    "services.exe",
+    "lsass.exe",
+    "runtimebroker.exe",
+    "spoolsv.exe",
+    "searchindexer.exe",
+    "python.exe",
+    "pythonw.exe",
+}
+
+def es_proceso_bloqueable(proc: psutil.Process) -> bool:
+    """
+    Determina si un proceso puede ser finalizado de forma segura.
+
+    Excluye procesos críticos del sistema y el propio proceso de LumiBlocker.
+
+    Args:
+        proc: Objeto psutil.Process.
+
+    Returns:
+        True si el proceso es bloqueable, False si debe ser protegido.
+    """
+    try:
+        nombre = proc.name().lower()
+        pid = proc.pid
+        return (
+            pid != os.getpid() and
+            nombre not in PROCESOS_PROTEGIDOS
+        )
+    except (psutil.NoSuchProcess, psutil.AccessDenied):
+        return False
+
 
 def obtener_procesos_activos():
     """
@@ -16,15 +58,18 @@ def obtener_procesos_activos():
 
 def cerrar_proceso(nombre_objetivo):
     """
-    Intenta cerrar todos los procesos cuyo nombre coincida con el nombre_objetivo.
+    Intenta cerrar todos los procesos cuyo nombre coincida con el nombre_objetivo,
+    siempre que no estén en la lista de procesos protegidos.
+    
     Retorna una lista con los PID de los procesos cerrados.
     """
     cerrados = []
     for proc in psutil.process_iter(['pid', 'name']):
         try:
             if proc.info['name'] == nombre_objetivo:
-                proc.terminate()
-                cerrados.append(proc.info['pid'])
+                if es_proceso_bloqueable(proc):
+                    proc.terminate()
+                    cerrados.append(proc.info['pid'])
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             continue
     return cerrados
