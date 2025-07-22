@@ -167,3 +167,16 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 ### Test
 - Actualización completa de `test_cli.py` con mocks a `main.*` en vez de `app.*`
 - Limpieza de duplicados y corrección de patch targets
+
+---
+
+## [0.1.14] - 2025-07-22
+### Added
+- Constante `PROCESOS_PROTEGIDOS` con procesos críticos de sistema
+- Función `es_proceso_bloqueable(proc)` para evitar cerrar procesos protegidos o el actual
+- Integración del filtro en `cerrar_proceso(...)`
+
+### Test
+- Tests unitarios que validan que procesos protegidos y el proceso actual no se cierran
+
+---
