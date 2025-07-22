@@ -2,6 +2,7 @@ import psutil # Librería para gestionar procesos en Python
 import time
 from app.config import cargar_configuracion
 import os
+from app.logger_bloqueo import registrar_evento_bloqueo
 
 PROCESOS_PROTEGIDOS = {
     "system",
@@ -60,19 +61,33 @@ def cerrar_proceso(nombre_objetivo):
     """
     Intenta cerrar todos los procesos cuyo nombre coincida con el nombre_objetivo,
     siempre que no estén en la lista de procesos protegidos.
-    
+
+    Registra los intentos en logs.json.
+
     Retorna una lista con los PID de los procesos cerrados.
     """
     cerrados = []
+    encontrado = False
+
     for proc in psutil.process_iter(['pid', 'name']):
         try:
             if proc.info['name'] == nombre_objetivo:
+                encontrado = True
                 if es_proceso_bloqueable(proc):
                     proc.terminate()
                     cerrados.append(proc.info['pid'])
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    registrar_evento_bloqueo("app", proc.info['name'], proc.info['pid'], "cerrado")
+                else:
+                    registrar_evento_bloqueo("app", proc.info['name'], proc.info['pid'], "protegido")
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
+            registrar_evento_bloqueo("app", nombre_objetivo, None, f"error: {type(e).__name__}")
             continue
+
+    if not encontrado:
+        registrar_evento_bloqueo("app", nombre_objetivo, None, "no encontrado")
+
     return cerrados
+
 
 def escanear_y_cerrar_apps(apps_bloqueadas):
     """
