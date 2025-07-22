@@ -140,3 +140,14 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 - Función auxiliar `_modo_horario_iter(...)` para facilitar pruebas controladas
 
 ---
+
+
+## [0.1.12] - 2025-07-21
+
+### Added
+- Función `modo_permanente(...)` que ejecuta una acción indefinidamente hasta ser desactivada manualmente
+- Función `estado_permanente_activado()` que verifica estado a partir de un archivo JSON
+
+### Test
+- Tests de `estado_permanente_activado()` simulando archivo con `mock_open`
+- Test de `modo_permanente()` validando una ejecución seguida de apagado
