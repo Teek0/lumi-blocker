@@ -1,8 +1,13 @@
 import typer
+from typing import Literal, Optional
 from app.gestor_procesos import bucle_bloqueo_procesos
 from app.gestor_webs import bloquear_webs, flush_dns, restaurar_hosts_original
 from utils.permisos import reiniciar_como_admin
 from app.config import cargar_configuracion
+from app.planificador import modo_temporizador, modo_horario, modo_permanente
+from utils.parsers import parsear_duracion
+
+MODOS_DISPONIBLES = ["temporizador", "horario", "permanente"]
 
 app = typer.Typer(help="LumiBlocker CLI - Controla tu enfoque bloqueando distracciones")
 
@@ -23,23 +28,80 @@ def main(ctx: typer.Context):
 
 @block_app.command("apps")
 def bloquear_apps(
-    duracion: float = typer.Option(10, help="Duración del bloqueo en segundos"),
+    modo: str = typer.Option(
+    "temporizador",
+    help="Modo de bloqueo",
+    show_choices=True,
+    metavar=f"{MODOS_DISPONIBLES}",
+),
+    duracion: Optional[str] = typer.Option(None, help="Duración (solo para modo temporizador). Ej: 25m, 1.5h"),
+    inicio: Optional[str] = typer.Option(None, help="Hora inicio (HH:MM, solo para modo horario)"),
+    fin: Optional[str] = typer.Option(None, help="Hora fin (HH:MM, solo para modo horario)"),
     intervalo: float = typer.Option(1, help="Intervalo entre escaneos en segundos")
 ):
     """
-    Bloquea las aplicaciones definidas en config.json durante cierto tiempo.
+    Bloquea las aplicaciones definidas en config.json, con modo a elección: temporizador, horario o permanente.
     """
-    typer.echo(f"Bloqueando apps por {duracion} segundos (intervalo: {intervalo}s)...")
-    bucle_bloqueo_procesos(duracion_segundos=duracion, intervalo=intervalo)
+    if modo not in MODOS_DISPONIBLES:
+        typer.echo(f"Modo inválido: {modo}. Debe ser uno de {MODOS_DISPONIBLES}.")
+        raise typer.Exit()
+    from app.config import cargar_configuracion
+    from app.gestor_procesos import bucle_bloqueo_procesos
+
+    config = cargar_configuracion()
+    apps_bloqueadas = config.get("apps_bloqueadas", [])
+
+    if not apps_bloqueadas:
+        typer.echo("No hay apps definidas para bloquear.")
+        raise typer.Exit()
+
+    def funcion_bloqueo():
+        bucle_bloqueo_procesos(duracion_segundos=1, intervalo=intervalo)
+
+    if modo == "temporizador":
+        if not duracion:
+            typer.echo("Debes especificar una duración para el modo temporizador.")
+            raise typer.Exit()
+        segundos = parsear_duracion(duracion)
+        modo_temporizador(funcion_bloqueo, duracion_segundos=segundos)
+
+    elif modo == "horario":
+        if not inicio or not fin:
+            typer.echo("Debes especificar --inicio y --fin en formato HH:MM para el modo horario.")
+            raise typer.Exit()
+        modo_horario(funcion_bloqueo, hora_inicio=inicio, hora_fin=fin, intervalo=int(intervalo))
+
+    elif modo == "permanente":
+        modo_permanente(funcion_bloqueo, intervalo=int(intervalo))
 
 @block_app.command("websites")
-def bloquear_websites(config_path: str = "config.json"):
+def bloquear_websites(
+    modo: str = typer.Option(
+    "temporizador",
+    help="Modo de bloqueo",
+    show_choices=True,
+    metavar=f"{MODOS_DISPONIBLES}",
+),
+    duracion: Optional[str] = typer.Option(None, help="Duración (solo para modo temporizador). Ej: 30m, 1h"),
+    inicio: Optional[str] = typer.Option(None, help="Hora inicio (HH:MM, solo para modo horario)"),
+    fin: Optional[str] = typer.Option(None, help="Hora fin (HH:MM, solo para modo horario)"),
+    intervalo: float = typer.Option(60, help="Intervalo entre chequeos en segundos"),
+    config_path: str = "config.json"
+):
     """
-    Bloquea sitios web definidos en config.json modificando el archivo hosts.
+    Bloquea sitios web definidos en config.json mediante modificación del archivo hosts.
+    Soporta modos: temporizador, horario, permanente.
     """
+    if modo not in MODOS_DISPONIBLES:
+        typer.echo(f"Modo inválido: {modo}. Debe ser uno de {MODOS_DISPONIBLES}.")
+        raise typer.Exit()
     import os
     if not os.environ.get("TESTING"):
         reiniciar_como_admin()
+
+    from app.gestor_webs import bloquear_webs, flush_dns
+    from app.config import cargar_configuracion
+
     config = cargar_configuracion(config_path)
     dominios = config.get("webs_bloqueadas", [])
 
@@ -47,10 +109,25 @@ def bloquear_websites(config_path: str = "config.json"):
         typer.echo("No hay sitios web definidos para bloquear en config.json.")
         raise typer.Exit()
 
-    typer.echo(f"Bloqueando los siguientes sitios: {', '.join(dominios)}")
-    bloquear_webs(dominios)
-    flush_dns()
-    typer.echo("Sitios bloqueados.")
+    def funcion_bloqueo():
+        bloquear_webs(dominios)
+        flush_dns()
+
+    if modo == "temporizador":
+        if not duracion:
+            typer.echo("Debes especificar una duración para el modo temporizador.")
+            raise typer.Exit()
+        segundos = parsear_duracion(duracion)
+        modo_temporizador(funcion_bloqueo, duracion_segundos=segundos)
+
+    elif modo == "horario":
+        if not inicio or not fin:
+            typer.echo("Debes especificar --inicio y --fin en formato HH:MM para el modo horario.")
+            raise typer.Exit()
+        modo_horario(funcion_bloqueo, hora_inicio=inicio, hora_fin=fin, intervalo=int(intervalo))
+
+    elif modo == "permanente":
+        modo_permanente(funcion_bloqueo, intervalo=int(intervalo))
 
 @unblock_app.command("websites")
 def desbloquear_websites():

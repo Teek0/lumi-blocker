@@ -128,3 +128,42 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 - Test unitarios para casos válidos y formato inválido
 
 ---
+
+## [0.1.11] - 2025-07-17
+
+### Added
+- Función `modo_horario(...)` en `planificador.py` que ejecuta acciones si la hora actual está en el rango definido
+- Soporte para rangos que cruzan medianoche (ej: 22:00 a 03:00)
+
+### Test
+- Test unitarios de `modo_horario` usando mocks de `datetime.now` para simular hora en rango y fuera de rango
+- Función auxiliar `_modo_horario_iter(...)` para facilitar pruebas controladas
+
+---
+
+
+## [0.1.12] - 2025-07-21
+
+### Added
+- Función `modo_permanente(...)` que ejecuta una acción indefinidamente hasta ser desactivada manualmente
+- Función `estado_permanente_activado()` que verifica estado a partir de un archivo JSON
+
+### Test
+- Tests de `estado_permanente_activado()` simulando archivo con `mock_open`
+- Test de `modo_permanente()` validando una ejecución seguida de apagado
+
+---
+
+## [0.1.13] - 2025-07-21
+
+### Added
+- CLI extendido para `block apps` y `block websites` con selección de modo: `temporizador`, `horario` o `permanente`
+- Nuevas opciones: `--modo`, `--duracion`, `--inicio`, `--fin`, `--intervalo`
+- Validación personalizada del parámetro `modo` con `MODOS_DISPONIBLES`
+
+### Changed
+- Reemplazo de `typing.Literal` por `str` con validación manual para compatibilidad con Typer
+
+### Test
+- Actualización completa de `test_cli.py` con mocks a `main.*` en vez de `app.*`
+- Limpieza de duplicados y corrección de patch targets
