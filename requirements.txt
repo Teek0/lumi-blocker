@@ -1,3 +1,4 @@
 typer[all]
 pytest 
 psutil
+PySide6
