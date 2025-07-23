@@ -201,3 +201,13 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 - Tests para verificar logging de errores `PermissionError` en `bloquear_webs(...)`
 
 ---
+
+## [0.2.0] - 2025-07-22
+
+### Changed
+- Se cierra el ciclo 0.1.x con logging completo, CLI estable y estructura modular
+- Inicia la etapa 0.2.x enfocada en persistencia avanzada, interfaz visual (GUI) y protección
+
+### Next
+- Desarrollar GUI con PySide6
+- Visualizar logs
