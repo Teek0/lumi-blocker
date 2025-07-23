@@ -17,8 +17,10 @@ def bloquear_webs(dominios):
         with open(RUTA_HOSTS, "r", encoding="utf-8") as f:
             contenido = f.readlines()
     except PermissionError:
+        registrar_evento_bloqueo("error", "bloquear_webs", None, "PermissionError al leer hosts")
         print("No tienes permisos suficientes para modificar el archivo hosts.")
         return
+
 
 # Eliminar secciones antiguas si existen
     nuevo_contenido = []
@@ -59,6 +61,7 @@ def restaurar_hosts_original():
         with open(RUTA_HOSTS, "r", encoding="utf-8") as f:
             contenido = f.readlines()
     except PermissionError:
+        registrar_evento_bloqueo("error", "restaurar_hosts_original", None, "PermissionError al leer hosts")
         print("No tienes permisos suficientes para modificar el archivo hosts.")
         return
 
