@@ -1,5 +1,6 @@
 from app.gestor_webs import bloquear_webs, MARCA_INICIO, MARCA_FIN, restaurar_hosts_original, flush_dns
 from unittest.mock import patch, mock_open
+from unittest import mock
 import platform
 
 def test_bloquear_webs_agrega_dominios():
@@ -54,3 +55,47 @@ def test_flush_dns_windows(mock_run):
     with patch("app.gestor_webs.platform.system", return_value="Windows"):
         flush_dns()
         mock_run.assert_called_once_with(["ipconfig", "/flushdns"], check=True)
+
+def test_bloquear_webs_registra_logs():
+    dominios = ["facebook.com", "twitter.com"]
+    contenido_hosts = [
+        "127.0.0.1 localhost\n",
+        "# === BLOQUEO LUMIBLOCKER INICIO ===\n",
+        "127.0.0.1 oldsite.com\n",
+        "# === BLOQUEO LUMIBLOCKER FIN ===\n",
+    ]
+
+    m = mock_open(read_data="".join(contenido_hosts))
+
+    with patch("app.gestor_webs.open", m):
+        with patch("app.gestor_webs.registrar_evento_bloqueo") as mock_log:
+            bloquear_webs(dominios)
+            for dominio in dominios:
+                mock_log.assert_any_call("web", dominio, None, "bloqueado")
+
+def test_restaurar_hosts_registra_log():
+    contenido_hosts = [
+        "127.0.0.1 localhost\n",
+        "# === BLOQUEO LUMIBLOCKER INICIO ===\n",
+        "127.0.0.1 facebook.com\n",
+        "# === BLOQUEO LUMIBLOCKER FIN ===\n",
+        "192.168.1.1 router.local\n",
+    ]
+
+    m = mock_open(read_data="".join(contenido_hosts))
+
+    with patch("app.gestor_webs.open", m):
+        with patch("app.gestor_webs.registrar_evento_bloqueo") as mock_log:
+            restaurar_hosts_original()
+            mock_log.assert_called_with("web", "todos", None, "restaurado")
+
+def test_bloquear_webs_loguea_error_si_falla_lectura():
+    dominios = ["bloqueame.com"]
+
+    with patch("app.gestor_webs.open", side_effect=PermissionError("sin permiso")), \
+         patch("app.gestor_webs.registrar_evento_bloqueo") as mock_log:
+
+        bloquear_webs(dominios)
+
+        mock_log.assert_any_call("error", "bloquear_webs", None, "PermissionError al leer hosts")
+

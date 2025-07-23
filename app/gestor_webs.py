@@ -1,6 +1,7 @@
 import os # Sirve para manejar rutas de archivos
 import platform # Para detectar el sistema operativo
 import subprocess # Para ejecutar comandos del sistema
+from app.logger_bloqueo import registrar_evento_bloqueo
 
 RUTA_HOSTS = r"C:\Windows\System32\drivers\etc\hosts" if platform.system() == "Windows" else "/etc/hosts"
 MARCA_INICIO = "# === BLOQUEO LUMIBLOCKER INICIO ===\n"
@@ -16,8 +17,10 @@ def bloquear_webs(dominios):
         with open(RUTA_HOSTS, "r", encoding="utf-8") as f:
             contenido = f.readlines()
     except PermissionError:
+        registrar_evento_bloqueo("error", "bloquear_webs", None, "PermissionError al leer hosts")
         print("No tienes permisos suficientes para modificar el archivo hosts.")
         return
+
 
 # Eliminar secciones antiguas si existen
     nuevo_contenido = []
@@ -37,6 +40,7 @@ def bloquear_webs(dominios):
     for dominio in dominios:
         bloque.append(f"127.0.0.1 {dominio}\n")
         bloque.append(f"::1 {dominio}\n")  # IPv6
+        registrar_evento_bloqueo("web", dominio, None, "bloqueado")
     bloque.append(MARCA_FIN)
 
     nuevo_contenido.extend(bloque)
@@ -57,6 +61,7 @@ def restaurar_hosts_original():
         with open(RUTA_HOSTS, "r", encoding="utf-8") as f:
             contenido = f.readlines()
     except PermissionError:
+        registrar_evento_bloqueo("error", "restaurar_hosts_original", None, "PermissionError al leer hosts")
         print("No tienes permisos suficientes para modificar el archivo hosts.")
         return
 
@@ -76,6 +81,7 @@ def restaurar_hosts_original():
         with open(RUTA_HOSTS, "w", encoding="utf-8") as f:
             f.writelines(nuevo_contenido)
         print("Bloqueo de sitios web desactivado.")
+        registrar_evento_bloqueo("web", "todos", None, "restaurado")
     except PermissionError:
         print("No se pudo escribir en el archivo hosts. Ejecuta como administrador.")
 

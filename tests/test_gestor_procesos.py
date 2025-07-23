@@ -1,5 +1,6 @@
 from app.gestor_procesos import obtener_procesos_activos, cerrar_proceso, escanear_y_cerrar_apps, ejecutar_con_duracion, bucle_bloqueo_procesos
 from unittest.mock import patch, MagicMock
+import psutil
 
 # Tests for obtener_procesos_activos
 def test_obtener_procesos_activos_retorna_lista():
@@ -101,3 +102,49 @@ def test_cerrar_proceso_ignora_pid_actual():
         cerrados = cerrar_proceso('notepad.exe')
         assert cerrados == []  # no debería cerrarse a sí mismo
         mock_proc.terminate.assert_not_called()
+
+def test_cerrar_proceso_registra_log_al_cerrar():
+    mock_proc = MagicMock()
+    mock_proc.info = {'name': 'notepad.exe', 'pid': 12345}
+    mock_proc.name.return_value = 'notepad.exe'
+    mock_proc.pid = 12345
+
+    with patch('psutil.process_iter', return_value=[mock_proc]):
+        with patch('app.gestor_procesos.registrar_evento_bloqueo') as mock_log:
+            cerrados = cerrar_proceso('notepad.exe')
+            assert cerrados == [12345]
+            mock_proc.terminate.assert_called_once()
+            mock_log.assert_called_with("app", 'notepad.exe', 12345, "cerrado")
+
+def test_cerrar_proceso_registra_log_protegido():
+    mock_proc = MagicMock()
+    mock_proc.info = {'name': 'explorer.exe', 'pid': 2222}
+    mock_proc.name.return_value = 'explorer.exe'
+    mock_proc.pid = 2222
+
+    with patch('psutil.process_iter', return_value=[mock_proc]):
+        with patch('app.gestor_procesos.registrar_evento_bloqueo') as mock_log:
+            cerrados = cerrar_proceso('explorer.exe')
+            assert cerrados == []
+            mock_proc.terminate.assert_not_called()
+            mock_log.assert_called_with("app", 'explorer.exe', 2222, "protegido")
+
+def test_cerrar_proceso_registra_log_no_encontrado():
+    with patch('psutil.process_iter', return_value=[]):
+        with patch('app.gestor_procesos.registrar_evento_bloqueo') as mock_log:
+            cerrados = cerrar_proceso('fantasma.exe')
+            assert cerrados == []
+            mock_log.assert_called_with("app", 'fantasma.exe', None, "no encontrado")
+
+def test_cerrar_proceso_registra_log_error_acceso():
+    class DummyProc:
+        info = {'name': 'bloqueado.exe', 'pid': 9999}
+        pid = 9999
+        def name(self):
+            raise psutil.AccessDenied(pid=self.pid)
+
+    with patch('psutil.process_iter', return_value=[DummyProc()]):
+        with patch('app.gestor_procesos.registrar_evento_bloqueo') as mock_log:
+            cerrados = cerrar_proceso('bloqueado.exe')
+            assert cerrados == []
+            mock_log.assert_called_with("app", 'bloqueado.exe', 9999, "protegido")

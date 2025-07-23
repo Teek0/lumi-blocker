@@ -86,3 +86,42 @@ def test_modo_permanente_ejecuta_y_se_detiene(): # Verifica que la función se e
 
     # La función debe haberse ejecutado exactamente una vez
     assert mock_func.call_count == 1
+
+def test_modo_temporizador_registra_inicio_y_fin():
+    mock_func = mock.Mock()
+    tiempos = [0, 0.5, 1.1]  # 2 iteraciones con intervalo ~0.5s
+
+    with mock.patch("app.planificador.time.time", side_effect=tiempos), \
+         mock.patch("app.planificador.time.sleep"), \
+         mock.patch("app.planificador.registrar_evento_bloqueo") as mock_log:
+
+        modo_temporizador(mock_func, duracion_segundos=1, nombre="block apps")
+
+        mock_log.assert_any_call("sesion", "block apps", None, "iniciada (modo: temporizador, duración: 1s)")
+        mock_log.assert_any_call("sesion", "block apps", None, "finalizada")
+
+def test_modo_temporizador_registra_interrupcion():
+    def interrumpe(*args, **kwargs):
+        raise KeyboardInterrupt
+
+    with mock.patch("app.planificador.time.time", return_value=0), \
+         mock.patch("app.planificador.time.sleep"), \
+         mock.patch("app.planificador.registrar_evento_bloqueo") as mock_log:
+
+        modo_temporizador(interrumpe, duracion_segundos=1, nombre="block apps")
+
+        mock_log.assert_any_call("sesion", "block apps", None, "iniciada (modo: temporizador, duración: 1s)")
+        mock_log.assert_any_call("sesion", "block apps", None, "detenida manualmente")
+
+def test_modo_permanente_registra_inicio_y_fin():
+    mock_func = mock.Mock()
+
+    with mock.patch("app.planificador.estado_permanente_activado", side_effect=[True, False]), \
+         mock.patch("app.planificador.time.sleep"), \
+         mock.patch("app.planificador.registrar_evento_bloqueo") as mock_log:
+
+        modo_permanente(mock_func, intervalo=1, nombre="block apps")
+
+        mock_log.assert_any_call("sesion", "block apps", None, "iniciada (modo: permanente)")
+        mock_log.assert_any_call("sesion", "block apps", None, "finalizada")
+
