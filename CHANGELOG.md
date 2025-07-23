@@ -180,3 +180,24 @@ Formato basado en [Semantic Versioning](https://semver.org/lang/es/).
 - Tests unitarios que validan que procesos protegidos y el proceso actual no se cierran
 
 ---
+
+## [0.1.15] - 2025-07-22
+
+### Added
+- Sistema de logging en `logs.json` para:
+  - Intentos de cierre de procesos
+  - Bloqueo y restauración de sitios web
+  - Errores de lectura y escritura del archivo `hosts`
+  - Inicio, finalización e interrupción de sesiones en modos `temporizador`, `horario` y `permanente`
+- Registro explícito de rangos horarios planificados en modo `horario`
+
+### Changed
+- `modo_temporizador(...)` ahora detecta `KeyboardInterrupt` y registra `"detenida manualmente"`
+- `modo_permanente(...)` registra inicio y finalización basándose en `estado_permanente_activado()`
+- `modo_horario(...)` ahora incluye el rango de tiempo en el mensaje de inicio y captura interrupciones
+
+### Test
+- Nuevos tests para registrar logs de sesiones en `modo_temporizador` y `modo_permanente`
+- Tests para verificar logging de errores `PermissionError` en `bloquear_webs(...)`
+
+---
