@@ -9,6 +9,7 @@ __pycache__/
 
 # Entorno virtual (opcional, si se llama venv)
 venv/
+.venv
 
 # Configuración de editor (opcional)
 .vscode/
